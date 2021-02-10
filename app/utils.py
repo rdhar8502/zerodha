@@ -12,6 +12,8 @@ from django.core.paginator import Paginator
 from celery import shared_task
 import time
 
+
+# ALL esentian params for easy config
 DIR = settings.BASE_DIR + '/datasets'
 target_zip = f"{DIR}/zip/target.zip"
 target_csv = f'{DIR}/targer.csv'
@@ -28,6 +30,7 @@ response = requests.get(url, headers=headers, timeout=5)
 columns = 'CODE,NAME,SC_GROUP,SC_TYPE,OPEN,HIGH,LOW,CLOSE,LAST,PREVCLOSE,NO_TRADES,VOLUME,NET_TURNOV,TDCLOINDI'
 
 
+# Unzip downloaded zip file from Bhavcopy
 def unzip():
     with zipfile.ZipFile(target_zip, "r") as zip_ref:
         for file in zip_ref.namelist():
@@ -39,6 +42,8 @@ def unzip():
             return data
 
 
+# Write on CSV file 
+# edit with relevent header
 def writeCSV(data):
     linecount = 0
     f = StringIO(columns)
@@ -75,6 +80,10 @@ def fetch():
         writeCSV(data)
 
 
+# Automated Task from celery-beat 
+# Configurable from Admin panel
+# Download data from Bhavcopy
+# Update new records to DB
 @shared_task
 def set_data():
     fetch()
@@ -98,6 +107,7 @@ def set_data():
             # bse.save()
 
 
+# deliver data from model to view
 def get_data(pagination, page_number=None, key=None):
     if key:
         data = BSE.objects.filter(NAME__contains=key)
@@ -106,6 +116,7 @@ def get_data(pagination, page_number=None, key=None):
         data = BSE.objects.all()
 
     if pagination:
+        # 25 row per page
         paginator = Paginator(data, 25)
         page_obj = paginator.get_page(page_number)
     else:
@@ -120,6 +131,7 @@ def get_details(code):
     return data
 
 
+# Create CSV file
 def create_cv(code):
     data = get_details(code)
     dir_name = os.path.join(DIR, "details.csv")
