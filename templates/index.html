@@ -1,0 +1,224 @@
+{% extends 'master.html' %}
+{% block content %}
+<div id="app">
+    <div class="container content-mtp">
+        <div class="card shadow-box card-box">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-sm-9 mtp2 mbp2">BSE</div>
+                </div>
+            </div>
+			<div class="card-footer text-right">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-end">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a href="?page=1" class="page-link">first</a>
+                        </li>
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="current">
+                            <div class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</div>
+                        </li>
+                        {% if page_obj.has_next %}
+                        <li>
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">next</a>
+                        </li>
+                        <li>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">last</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+             <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group row">
+                            <div class="col-sm-5  col-lg-5">
+                                <div class="input-group mb-2">
+                                    <input type="text" id="myInput" class="form-control form-control-md" placeholder="Search for Names"  style="width:100%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tag_cloud" class="col-sm-12">
+                        <div id="tag" class="table-responsive">
+                            <table id="myTable" class="table table-bordered table-style text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">CODE</th>
+                                        <th scope="col">NAME</th>
+                                        <th scope="col">OPEN</th>
+                                        <th scope="col">HIGH</th>
+                                        <th scope="col">LOW</th>
+                                        <th scope="col">CLOSE</th>
+                                        <th scope="col">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for com in page_obj %}
+                                    <tr>
+                                        <td>{{com.CODE}}</td>
+                                        <td>{{com.NAME}}</td>
+                                        <td>{{com.OPEN}}</td>
+                                        <td>{{com.HIGH}}</td>
+                                        <td>{{com.LOW}}</td>
+                                        <td>{{com.CLOSE}}</td>
+                                        <td><a href="/details_page/{{com.CODE}}" class="btn btn-success">VIEW</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+             </div>
+            <div class="card-footer text-right">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-end">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a href="?page=1" class="page-link">first</a>
+                        </li>
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="current">
+                            <div class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</div>
+                        </li>
+                        {% if page_obj.has_next %}
+                        <li>
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">next</a>
+                        </li>
+                        <li>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">last</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<script>
+    $(document).ready(function(){
+$.ajax({
+  url: '/api/names',
+  success: function(data){
+    autocomplete(document.getElementById("myInput"), data);
+  }
+});
+
+function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i]['name'].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = "<strong>" + arr[i]['name'].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i]['name'].substr(val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input id="+arr[i]['code']+" type='hidden' value='" + arr[i]['name'] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+              b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              window.location = '/details_page/'+this.getElementsByTagName("input")[0].id;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+      x[i].parentNode.removeChild(x[i]);
+    }
+  }
+}
+/*execute a function when someone clicks in the document:*/
+document.addEventListener("click", function (e) {
+    closeAllLists(e.target);
+});
+}
+
+function enableTxt(elem) {
+    var id = $(elem).attr("id");
+    alert(id);
+}
+
+
+});
+</script>
+{% endblock %}

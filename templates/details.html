@@ -1,0 +1,48 @@
+{% extends 'master.html' %}
+{% block content %}
+<div id="app">
+    <div class="container content-mtp">
+        <div class="card shadow-box card-box">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-sm-9 mtp2 mbp2">{{name}}</div>
+                    <div class="col-sm-3 mtp2 mbp2"><a href="{{code}}/details_csv" class="btn btn-success">DOWNLOAD</a></div>
+                </div>
+            </div>
+             <div class="card-body">
+                <div class="row">
+                    <div id="tag_cloud" class="col-sm-12">
+                        <div id="tag" class="table-responsive">
+                            <table id="myTable" class="table table-bordered table-style text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">CODE</th>
+                                        <th scope="col">NAME</th>
+                                        <th scope="col">OPEN</th>
+                                        <th scope="col">HIGH</th>
+                                        <th scope="col">LOW</th>
+                                        <th scope="col">CLOSE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{code}}</td>
+                                        <td>{{name}}</td>
+                                        <td>{{open}}</td>
+                                        <td>{{high}}</td>
+                                        <td>{{low}}</td>
+                                        <td>{{close}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+             </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
