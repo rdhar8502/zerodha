@@ -13,6 +13,8 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
 # Create your views here.
+# Main Home View Function
+# Pagination Available
 def index(request):
     page_number = request.GET.get('page')
     data = get_data(True, page_number)
@@ -20,9 +22,13 @@ def index(request):
     context = {'page_obj': data}
     return render(request, 'index.html', context)
 
-
+# after call details of perticular company
+# request type: GET
+# params : code <Company Code>
 def details_page(request, code):
     data = get_details(code)
+    
+    # If code filtered from cache then return directly
     if cache.get(code):
         print("==============FROM CASHE==============")
         json_Data = cache.get(code)
@@ -32,20 +38,29 @@ def details_page(request, code):
         json_Data = {'code': data.CODE, 'name': data.NAME.strip(), 'open': data.OPEN, 'high': data.HIGH,
                      'low': data.LOW,
                      'close': data.CLOSE}
+        # Set code and data to cache memory 
         cache.set(code, json_Data)
 
     return render(request, 'details.html', json_Data)
 
 
+# Download CSV file of perticular company
+# Request Type: GET
+# params: Code
 def download_csv(request, code):
     dir_name, filename = create_cv(code)
 
+    # Open CSV file and send to client side
     with open(dir_name, "rb") as f:
         response = HttpResponse(f.read(), content_type="application/vnd.ms-excel")
         response['Content-Disposition'] = f'inline; filename={filename}.csv'
         return response
 
-
+    
+# Autofile view, for better user exprience
+# Can establish better and easy acess for user
+# request Type: Get
+# Pagination not available
 def auto_fill(request):
     datas = get_data(False)
     all_data = []
